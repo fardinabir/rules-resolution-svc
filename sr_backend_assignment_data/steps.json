@@ -1,0 +1,38 @@
+[
+  {
+    "key": "title-search",
+    "name": "Title Search",
+    "description": "Research property ownership, liens, encumbrances, and tax status. Verify chain of title.",
+    "position": 1
+  },
+  {
+    "key": "file-complaint",
+    "name": "File Complaint",
+    "description": "Prepare and file the foreclosure complaint (judicial) or notice of default (non-judicial) with the court.",
+    "position": 2
+  },
+  {
+    "key": "serve-borrower",
+    "name": "Serve Borrower",
+    "description": "Serve the borrower and all named defendants with the complaint and summons via process server.",
+    "position": 3
+  },
+  {
+    "key": "obtain-judgment",
+    "name": "Obtain Judgment",
+    "description": "Obtain a judgment of foreclosure from the court authorizing the sale of the property.",
+    "position": 4
+  },
+  {
+    "key": "schedule-sale",
+    "name": "Schedule Sale",
+    "description": "Schedule the foreclosure sale date, coordinate publication requirements, and notify all parties.",
+    "position": 5
+  },
+  {
+    "key": "conduct-sale",
+    "name": "Conduct Sale",
+    "description": "Conduct the foreclosure auction, process bids, and file the certificate of sale.",
+    "position": 6
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "title-search": {
+    "slaHours": 720,
+    "requiredDocuments": ["title_commitment", "tax_certificate"],
+    "feeAmount": 35000,
+    "feeAuthRequired": false,
+    "assignedRole": "processor",
+    "templateId": "title-review-standard-v1"
+  },
+  "file-complaint": {
+    "slaHours": 480,
+    "requiredDocuments": ["complaint", "summons", "lis_pendens", "cover_sheet"],
+    "feeAmount": 65000,
+    "feeAuthRequired": false,
+    "assignedRole": "attorney",
+    "templateId": "complaint-standard-v1"
+  },
+  "serve-borrower": {
+    "slaHours": 2880,
+    "requiredDocuments": ["affidavit_of_service", "return_of_service"],
+    "feeAmount": 25000,
+    "feeAuthRequired": false,
+    "assignedRole": "processor",
+    "templateId": "service-standard-v1"
+  },
+  "obtain-judgment": {
+    "slaHours": 4320,
+    "requiredDocuments": ["motion_for_judgment", "affidavit_of_indebtedness", "proposed_judgment"],
+    "feeAmount": 45000,
+    "feeAuthRequired": false,
+    "assignedRole": "attorney",
+    "templateId": "judgment-standard-v1"
+  },
+  "schedule-sale": {
+    "slaHours": 1440,
+    "requiredDocuments": ["notice_of_sale", "publication_proof"],
+    "feeAmount": 30000,
+    "feeAuthRequired": false,
+    "assignedRole": "processor",
+    "templateId": "sale-notice-standard-v1"
+  },
+  "conduct-sale": {
+    "slaHours": 720,
+    "requiredDocuments": ["certificate_of_sale", "sale_report"],
+    "feeAmount": 50000,
+    "feeAuthRequired": false,
+    "assignedRole": "attorney",
+    "templateId": "sale-report-standard-v1"
+  }
+}

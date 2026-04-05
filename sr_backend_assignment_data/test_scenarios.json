@@ -1,0 +1,593 @@
+[
+  {
+    "name": "Simple state overrides — Florida baseline",
+    "description": "Tests that state-level overrides (specificity 1) apply correctly. No client or investor overrides in play.",
+    "context": {
+      "state": "FL",
+      "client": "Nationstar",
+      "investor": "FannieMae",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "title-search",
+        "traitKey": "slaHours",
+        "expectedValue": 480,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-048",
+        "explanation": "FL+Nationstar override (specificity 2) — Nationstar has a tighter title search deadline in FL"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 360,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-001",
+        "explanation": "FL state override (specificity 1)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "verification_of_complaint"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-002",
+        "explanation": "FL state override adds verification_of_complaint"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "slaHours",
+        "expectedValue": 2160,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-003",
+        "explanation": "FL 90-day service window (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": false,
+        "expectedSource": "default",
+        "explanation": "No fee auth override for Nationstar — Chase-specific override (ovr-030) does not apply"
+      },
+      {
+        "stepKey": "conduct-sale",
+        "traitKey": "templateId",
+        "expectedValue": "sale-report-fl-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-014",
+        "explanation": "FL-specific sale report template (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "State + client stacking — Florida Chase",
+    "description": "Tests that specificity-2 overrides (state+client) beat specificity-1 overrides (state-only).",
+    "context": {
+      "state": "FL",
+      "client": "Chase",
+      "investor": "FreddieMac",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 240,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-020",
+        "explanation": "FL+Chase (specificity 2) beats FL-only ovr-001 (specificity 1). 10-day deadline vs 15-day."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAmount",
+        "expectedValue": 60000,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-053",
+        "explanation": "FL+Chase negotiated filing fee (specificity 2)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": true,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-031",
+        "explanation": "Chase global fee auth policy (specificity 1) — no higher-specificity override exists"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "templateId",
+        "expectedValue": "complaint-fl-chase-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-025",
+        "explanation": "FL+Chase complaint template (specificity 2)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": true,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-030",
+        "explanation": "Chase global fee auth applies to title search too"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "slaHours",
+        "expectedValue": 2880,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-026",
+        "explanation": "FL+Chase judgment timeline — Chase pushes harder (specificity 2)"
+      }
+    ]
+  },
+
+  {
+    "name": "Three-dimension specificity — Florida Chase FHA",
+    "description": "Tests that specificity-3 overrides (state+client+investor) beat specificity-2 overrides.",
+    "context": {
+      "state": "FL",
+      "client": "Chase",
+      "investor": "FHA",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 168,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-034",
+        "explanation": "FL+Chase+FHA (specificity 3) beats FL+Chase ovr-020 (specificity 2). 7-day deadline."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAmount",
+        "expectedValue": 55000,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-035",
+        "explanation": "FL+Chase+FHA reduced fee (specificity 3) beats FL+Chase ovr-053 (specificity 2)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "verification_of_complaint", "hud_face_sheet", "fha_servicing_history"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-036",
+        "explanation": "FL+Chase+FHA docs (specificity 3) — adds HUD face sheet and FHA servicing history on top of FL requirements"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "templateId",
+        "expectedValue": "complaint-fl-chase-fha-v3",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-037",
+        "explanation": "FHA-specific template for Chase in FL (specificity 3)"
+      }
+    ]
+  },
+
+  {
+    "name": "Four-dimension specificity — Florida Chase FannieMae Judicial",
+    "description": "Tests the highest specificity level (4 dimensions pinned). Only templateId has a specificity-4 override.",
+    "context": {
+      "state": "FL",
+      "client": "Chase",
+      "investor": "FannieMae",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "templateId",
+        "expectedValue": "complaint-fl-chase-fnma-judicial-v3",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-047",
+        "explanation": "Specificity 4 — all four dimensions pinned. Most specific override in the entire dataset."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 240,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-020",
+        "explanation": "No FannieMae-specific SLA override exists — falls back to FL+Chase (specificity 2)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "verification_of_complaint"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-002",
+        "explanation": "No FannieMae docs override — falls back to FL state (specificity 1). FHA overrides don't apply to FannieMae."
+      }
+    ]
+  },
+
+  {
+    "name": "Non-judicial case type — Texas",
+    "description": "Tests caseType dimension overrides. Non-judicial cases have fundamentally different document requirements and skip the judgment step.",
+    "context": {
+      "state": "TX",
+      "client": "Nationstar",
+      "investor": "FannieMae",
+      "caseType": "FC-NonJudicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 240,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-042",
+        "explanation": "TX+NonJudicial (specificity 2) beats TX-only ovr-005 (specificity 1)"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["notice_of_substitute_trustee_sale", "affidavit_of_mailing", "certified_mail_receipt"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-041",
+        "explanation": "TX+NonJudicial (specificity 2) — completely different docs for non-judicial service"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "slaHours",
+        "expectedValue": 1440,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-007",
+        "explanation": "TX state 60-day service window (specificity 1)"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "slaHours",
+        "expectedValue": 0,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-043",
+        "explanation": "Non-judicial cases skip judgment — SLA is 0 (specificity 1)"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "feeAmount",
+        "expectedValue": 0,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-044",
+        "explanation": "No fee for skipped judgment step (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "New York complexity — NY Chase",
+    "description": "Tests NY's heavier requirements (more filings, higher fees, longer timelines) combined with Chase's fee auth policy.",
+    "context": {
+      "state": "NY",
+      "client": "Chase",
+      "investor": "FreddieMac",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 720,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-008",
+        "explanation": "NY state 30-day deadline (specificity 1) — no NY+Chase override for this trait"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "rpapl_1303_notice", "90_day_notice", "certificate_of_merit"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-009",
+        "explanation": "NY requires 3 additional filings beyond default (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "feeAmount",
+        "expectedValue": 42500,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-022",
+        "explanation": "NY+Chase negotiated lower title search fee (specificity 2) beats NY-only ovr-012 (specificity 1)"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "slaHours",
+        "expectedValue": 8640,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-010",
+        "explanation": "NY judgment 360-day timeline — court backlog (specificity 1)"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "feeAmount",
+        "expectedValue": 35000,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-054",
+        "explanation": "NY service fees higher (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "Ohio with Wells Fargo — cross-dimension",
+    "description": "Tests that a client-level override (Wells Fargo template, specificity 1) applies even in a state with its own overrides.",
+    "context": {
+      "state": "OH",
+      "client": "WellsFargo",
+      "investor": "Private",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "title-search",
+        "traitKey": "slaHours",
+        "expectedValue": 504,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-055",
+        "explanation": "OH title search 21-day deadline (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "templateId",
+        "expectedValue": "title-review-wf-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-024",
+        "explanation": "Wells Fargo global title template (specificity 1) — different dimension than the OH SLA override, no conflict"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["motion_for_judgment", "affidavit_of_indebtedness", "proposed_judgment", "military_affidavit", "affidavit_of_compliance"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-015",
+        "explanation": "OH requires extra affidavits for judgment (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": false,
+        "expectedSource": "default",
+        "explanation": "Wells Fargo has no fee auth requirement — only Chase does"
+      }
+    ]
+  },
+
+  {
+    "name": "Illinois Wells Fargo FannieMae — state+client specificity",
+    "description": "Tests IL+WellsFargo specificity-2 override beating IL-only specificity-1 where both exist.",
+    "context": {
+      "state": "IL",
+      "client": "WellsFargo",
+      "investor": "FannieMae",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 360,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-051",
+        "explanation": "IL+WellsFargo (specificity 2) — 15-day deadline"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["title_commitment", "tax_certificate", "municipal_lien_search"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-052",
+        "explanation": "IL requires municipal lien search (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "templateId",
+        "expectedValue": "title-review-wf-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-024",
+        "explanation": "WellsFargo global title template (specificity 1)"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "slaHours",
+        "expectedValue": 2160,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-011",
+        "explanation": "IL 90-day service window (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "Mostly defaults — Illinois Nationstar",
+    "description": "Tests that when no overrides match for most traits, defaults are returned correctly. Illinois has a few state overrides but Nationstar has almost none.",
+    "context": {
+      "state": "IL",
+      "client": "Nationstar",
+      "investor": "Private",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 480,
+        "expectedSource": "default",
+        "explanation": "No IL-only override for file-complaint.slaHours. IL+WellsFargo override (ovr-051) doesn't match Nationstar. Falls to default."
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "slaHours",
+        "expectedValue": 720,
+        "expectedSource": "default",
+        "explanation": "No title-search SLA override for IL or Nationstar. Default 30 days."
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["title_commitment", "tax_certificate", "municipal_lien_search"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-052",
+        "explanation": "IL state override still applies — it doesn't require a specific client (specificity 1)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": false,
+        "expectedSource": "default",
+        "explanation": "Nationstar has no fee auth policy — only Chase does"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "slaHours",
+        "expectedValue": 2160,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-011",
+        "explanation": "IL 90-day service window still applies (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "Investor-level override tiebreaker — Florida VA",
+    "description": "Tests effectiveDate tiebreaking when a state override and investor override have the same specificity. VA investor override (2025-03-01) should beat FL state override (2025-01-01) for requiredDocuments.",
+    "context": {
+      "state": "FL",
+      "client": "WellsFargo",
+      "investor": "VA",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 336,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-021",
+        "explanation": "FL+WellsFargo (specificity 2) — 14-day deadline"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "va_loan_summary", "va_appraisal"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-039",
+        "explanation": "VA investor override (specificity 1, effectiveDate 2025-03-01) beats FL state override ovr-002 (specificity 1, effectiveDate 2025-01-01). Same specificity — more recent date wins."
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "templateId",
+        "expectedValue": "service-fl-wf-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-023",
+        "explanation": "FL+WellsFargo service template (specificity 2)"
+      },
+      {
+        "stepKey": "serve-borrower",
+        "traitKey": "slaHours",
+        "expectedValue": 2160,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-003",
+        "explanation": "FL 90-day service window (specificity 1)"
+      }
+    ]
+  },
+
+  {
+    "name": "Effective date filtering — FL Chase FHA as of 2025-07-01",
+    "description": "Tests the asOfDate parameter. The FL+Chase+FHA overrides (specificity 3) have effectiveDate 2025-09-01, so they should NOT apply when resolving as of 2025-07-01. The system should fall back to FL+Chase overrides (specificity 2, effective 2025-06-01).",
+    "context": {
+      "state": "FL",
+      "client": "Chase",
+      "investor": "FHA",
+      "caseType": "FC-Judicial",
+      "asOfDate": "2025-07-01"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "slaHours",
+        "expectedValue": 240,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-020",
+        "explanation": "ovr-034 (FL+Chase+FHA, specificity 3) has effectiveDate 2025-09-01 — not yet effective as of 2025-07-01. Falls to ovr-020 (FL+Chase, specificity 2, effective 2025-06-01)."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAmount",
+        "expectedValue": 60000,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-053",
+        "explanation": "ovr-035 (FL+Chase+FHA feeAmount) not yet effective. Falls to ovr-053 (FL+Chase, specificity 2)."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "hud_face_sheet"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-038",
+        "explanation": "ovr-036 (FL+Chase+FHA docs, specificity 3) not yet effective as of 2025-07-01. Falls to specificity-1 candidates: ovr-038 (FHA investor, effective 2025-03-01) and ovr-002 (FL state, effective 2025-01-01). Same specificity — ovr-038 wins on more recent effectiveDate."
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "templateId",
+        "expectedValue": "complaint-fl-chase-v2",
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-025",
+        "explanation": "ovr-037 (FL+Chase+FHA template) not yet effective. Falls to ovr-025 (FL+Chase, specificity 2, effective 2025-06-01)."
+      }
+    ]
+  },
+
+  {
+    "name": "Ohio Chase FHA — cross-state investor override",
+    "description": "Tests that investor-level overrides (FHA) apply in states that have no state+investor override. Also tests Chase fee auth stacking across all steps.",
+    "context": {
+      "state": "OH",
+      "client": "Chase",
+      "investor": "FHA",
+      "caseType": "FC-Judicial"
+    },
+    "expectedResolutions": [
+      {
+        "stepKey": "title-search",
+        "traitKey": "slaHours",
+        "expectedValue": 504,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-055",
+        "explanation": "OH state title search deadline (specificity 1)"
+      },
+      {
+        "stepKey": "title-search",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": true,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-030",
+        "explanation": "Chase global fee auth (specificity 1)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["complaint", "summons", "lis_pendens", "cover_sheet", "hud_face_sheet"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-038",
+        "explanation": "FHA investor override (specificity 1, effective 2025-03-01) — no OH-specific docs override for file-complaint exists, so this is the only match"
+      },
+      {
+        "stepKey": "obtain-judgment",
+        "traitKey": "requiredDocuments",
+        "expectedValue": ["motion_for_judgment", "affidavit_of_indebtedness", "proposed_judgment", "military_affidavit", "affidavit_of_compliance"],
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-015",
+        "explanation": "OH state judgment docs override (specificity 1)"
+      },
+      {
+        "stepKey": "file-complaint",
+        "traitKey": "feeAuthRequired",
+        "expectedValue": true,
+        "expectedSource": "override",
+        "expectedOverrideId": "ovr-031",
+        "explanation": "Chase fee auth applies to filing in OH (specificity 1)"
+      }
+    ]
+  }
+]
