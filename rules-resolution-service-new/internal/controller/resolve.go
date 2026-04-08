@@ -31,13 +31,17 @@ func NewResolveHandler(svc service.ResolveService) ResolveHandler {
 	return &resolveHandler{svc: svc}
 }
 
-type resolveRequest struct {
-	State    string `json:"state"`
-	Client   string `json:"client"`
-	Investor string `json:"investor"`
-	CaseType string `json:"caseType"`
-	AsOfDate string `json:"asOfDate,omitempty"` // "2006-01-02"
+// ResolveRequest is the input for POST /api/resolve and /api/resolve/explain.
+type ResolveRequest struct {
+	State    string `json:"state"    example:"FL"`
+	Client   string `json:"client"   example:"Chase"`
+	Investor string `json:"investor" example:"FNMA"`
+	CaseType string `json:"caseType" example:"judicial"`
+	AsOfDate string `json:"asOfDate,omitempty" example:"2026-01-15"` // "2006-01-02"
 }
+
+// resolveRequest is an alias kept for internal use.
+type resolveRequest = ResolveRequest
 
 func (h *resolveHandler) parseContext(c echo.Context) (domain.CaseContext, error) {
 	var req resolveRequest
@@ -59,7 +63,15 @@ func (h *resolveHandler) parseContext(c echo.Context) (domain.CaseContext, error
 	return ctx, nil
 }
 
-// Resolve handles POST /api/resolve.
+// @Summary      Resolve case context
+// @Tags         resolve
+// @Accept       json
+// @Produce      json
+// @Param        request    body    ResolveRequest  true    "Case context to resolve"
+// @Success      200        {object}    ResponseData{data=domain.ResolvedConfig}
+// @Failure      400        {object}    ResponseError
+// @Failure      500        {object}    ResponseError
+// @Router       /resolve [post]
 func (h *resolveHandler) Resolve(c echo.Context) error {
 	caseCtx, err := h.parseContext(c)
 	if err != nil {
@@ -76,7 +88,15 @@ func (h *resolveHandler) Resolve(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-// Explain handles POST /api/resolve/explain.
+// @Summary      Explain trait resolution
+// @Tags         resolve
+// @Accept       json
+// @Produce      json
+// @Param        request    body    ResolveRequest  true    "Case context for trait trace"
+// @Success      200        {array}     domain.TraitTrace
+// @Failure      400        {object}    ResponseError
+// @Failure      500        {object}    ResponseError
+// @Router       /resolve/explain [post]
 func (h *resolveHandler) Explain(c echo.Context) error {
 	caseCtx, err := h.parseContext(c)
 	if err != nil {
@@ -93,13 +113,22 @@ func (h *resolveHandler) Explain(c echo.Context) error {
 	return c.JSON(http.StatusOK, traces)
 }
 
-type bulkResolveRequest struct {
-	Contexts []resolveRequest `json:"contexts"`
+// BulkResolveRequest is the input for POST /api/resolve/bulk.
+type BulkResolveRequest struct {
+	Contexts []ResolveRequest `json:"contexts"`
 }
 
-// BulkResolve handles POST /api/resolve/bulk.
+// @Summary      Bulk resolve case contexts
+// @Tags         resolve
+// @Accept       json
+// @Produce      json
+// @Param        request    body    BulkResolveRequest  true    "Multiple case contexts to resolve"
+// @Success      200        {object}    map[string]interface{}
+// @Failure      400        {object}    ResponseError
+// @Failure      500        {object}    ResponseError
+// @Router       /resolve/bulk [post]
 func (h *resolveHandler) BulkResolve(c echo.Context) error {
-	var req bulkResolveRequest
+	var req BulkResolveRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, ResponseError{
 			Errors: []Error{{Code: errors.CodeBadRequest, Message: err.Error()}},
