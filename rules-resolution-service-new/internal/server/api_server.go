@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/fardinabir/go-svc-boilerplate/internal/cache"
+	"github.com/fardinabir/go-svc-boilerplate/internal/model"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -11,11 +13,11 @@ import (
 
 // userAPIServer is the API server for User
 type userAPIServer struct {
-	port         int
-	engine       *echo.Echo
-	log          *log.Entry
-	db           *gorm.DB
-	defaultActor string
+	engine *echo.Echo
+	log    *log.Entry
+	db     *gorm.DB
+	cache  cache.Cache
+	cfg    model.Config
 }
 
 func (s *userAPIServer) Name() string {
@@ -24,12 +26,12 @@ func (s *userAPIServer) Name() string {
 
 // Run starts the User API server
 func (s *userAPIServer) Run() error {
-	log.Infof("%s serving on port %d", s.Name(), s.port)
-	return s.engine.Start(fmt.Sprintf(":%d", s.port))
+	log.Infof("%s serving on port %d", s.Name(), s.cfg.APIServer.Port)
+	return s.engine.Start(fmt.Sprintf(":%d", s.cfg.APIServer.Port))
 }
 
 // Shutdown stops the User API server
 func (s *userAPIServer) Shutdown(ctx context.Context) error {
-	log.Infof("shutting down %s serving on port %d", s.Name(), s.port)
+	log.Infof("shutting down %s serving on port %d", s.Name(), s.cfg.APIServer.Port)
 	return s.engine.Shutdown(ctx)
 }
