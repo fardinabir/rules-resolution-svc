@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -14,6 +15,7 @@ import (
 // OverrideRepository defines all DB operations for the overrides table.
 type OverrideRepository interface {
 	FindMatchingOverrides(ctx context.Context, caseCtx domain.CaseContext) ([]domain.Override, error)
+	FindMatchingOverridesBatch(ctx context.Context, contexts []domain.CaseContext) ([][]domain.Override, error)
 	GetByID(ctx context.Context, id string) (*domain.Override, error)
 	List(ctx context.Context, filter OverrideFilter) ([]domain.Override, int64, error)
 	Create(ctx context.Context, o domain.Override) error
@@ -89,6 +91,104 @@ ORDER BY step_key, trait_key, specificity DESC, effective_date DESC, created_at 
 	return rowsToOverrides(rows)
 }
 
+// / batchOverrideRow extends overrideRow with the context index for partitioning.
+type batchOverrideRow struct {
+	CtxIdx        int             `gorm:"column:ctx_idx"`
+	ID            string          `gorm:"column:id"`
+	StepKey       string          `gorm:"column:step_key"`
+	TraitKey      string          `gorm:"column:trait_key"`
+	State         *string         `gorm:"column:state"`
+	Client        *string         `gorm:"column:client"`
+	Investor      *string         `gorm:"column:investor"`
+	CaseType      *string         `gorm:"column:case_type"`
+	Specificity   int             `gorm:"column:specificity"`
+	Value         json.RawMessage `gorm:"column:value"`
+	EffectiveDate time.Time       `gorm:"column:effective_date"`
+	ExpiresDate   *time.Time      `gorm:"column:expires_date"`
+	Status        string          `gorm:"column:status"`
+	Description   string          `gorm:"column:description"`
+	CreatedAt     time.Time       `gorm:"column:created_at"`
+	CreatedBy     string          `gorm:"column:created_by"`
+	UpdatedAt     time.Time       `gorm:"column:updated_at"`
+	UpdatedBy     string          `gorm:"column:updated_by"`
+}
+
+func (b batchOverrideRow) toOverrideRow() overrideRow {
+	return overrideRow{
+		ID: b.ID, StepKey: b.StepKey, TraitKey: b.TraitKey,
+		State: b.State, Client: b.Client, Investor: b.Investor, CaseType: b.CaseType,
+		Specificity: b.Specificity, Value: b.Value,
+		EffectiveDate: b.EffectiveDate, ExpiresDate: b.ExpiresDate,
+		Status: b.Status, Description: b.Description,
+		CreatedAt: b.CreatedAt, CreatedBy: b.CreatedBy,
+		UpdatedAt: b.UpdatedAt, UpdatedBy: b.UpdatedBy,
+	}
+}
+
+// buildBulkQuery constructs a VALUES CTE query and its positional argument slice for the
+// given contexts. Parameters are positional scalars ($1..$n*5) — no array types, safe with GORM.
+// Query and args are built together so a length mismatch is impossible.
+func buildBulkQuery(contexts []domain.CaseContext) (string, []any) {
+	const selectCols = `
+SELECT c.ctx_idx,
+       o.id, o.step_key, o.trait_key, o.state, o.client, o.investor, o.case_type,
+       o.specificity, o.value, o.effective_date, o.expires_date,
+       o.status, o.description, o.created_at, o.created_by, o.updated_at, o.updated_by
+FROM contexts c
+JOIN overrides o ON (
+    o.status = 'active'
+    AND o.effective_date  <= c.as_of_date
+    AND (o.expires_date IS NULL OR o.expires_date > c.as_of_date)
+    AND (o.state     IS NULL OR o.state     = c.state)
+    AND (o.client    IS NULL OR o.client    = c.client)
+    AND (o.investor  IS NULL OR o.investor  = c.investor)
+    AND (o.case_type IS NULL OR o.case_type = c.case_type)
+)
+ORDER BY c.ctx_idx, o.step_key, o.trait_key,
+         o.specificity DESC, o.effective_date DESC, o.created_at DESC`
+
+	rows := make([]string, len(contexts))
+	args := make([]any, 0, len(contexts)*5)
+	p := 1
+	for i, c := range contexts {
+		rows[i] = fmt.Sprintf("(%d, $%d::text, $%d::text, $%d::text, $%d::text, $%d::timestamptz)",
+			i, p, p+1, p+2, p+3, p+4)
+		args = append(args, c.State, c.Client, c.Investor, c.CaseType, c.AsOfDate)
+		p += 5
+	}
+	cte := "WITH contexts(ctx_idx, state, client, investor, case_type, as_of_date) AS (\n    VALUES\n        " +
+		strings.Join(rows, ",\n        ") + "\n)" + selectCols
+
+	return cte, args
+}
+
+func (r *pgOverrideRepo) FindMatchingOverridesBatch(ctx context.Context, contexts []domain.CaseContext) ([][]domain.Override, error) {
+	n := len(contexts)
+	if n == 0 {
+		return nil, nil
+	}
+
+	query, args := buildBulkQuery(contexts)
+
+	var rows []batchOverrideRow
+	if err := r.db.WithContext(ctx).Raw(query, args...).Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([][]domain.Override, n)
+	for i := range result {
+		result[i] = []domain.Override{}
+	}
+	for _, row := range rows {
+		o, err := rowToOverride(row.toOverrideRow())
+		if err != nil {
+			return nil, err
+		}
+		result[row.CtxIdx] = append(result[row.CtxIdx], o)
+	}
+	return result, nil
+}
+
 func (r *pgOverrideRepo) GetByID(ctx context.Context, id string) (*domain.Override, error) {
 	var row overrideRow
 	res := r.db.WithContext(ctx).Raw(`
@@ -111,6 +211,7 @@ func (r *pgOverrideRepo) GetByID(ctx context.Context, id string) (*domain.Overri
 }
 
 func (r *pgOverrideRepo) List(ctx context.Context, f OverrideFilter) ([]domain.Override, int64, error) {
+	// Build WHERE clause and args shared by both the data query and count query.
 	where := " WHERE 1=1"
 	var filterArgs []interface{}
 	argN := 1
@@ -161,6 +262,7 @@ func (r *pgOverrideRepo) List(ctx context.Context, f OverrideFilter) ([]domain.O
 	}
 	offset := (page - 1) * pageSize
 
+	// Data query with window function for total count.
 	dataArgs := append(filterArgs, pageSize, offset) //nolint:gocritic
 	dataQ := `SELECT id, step_key, trait_key, state, client, investor, case_type,
 	             specificity, value::text AS value, effective_date, expires_date,
@@ -445,6 +547,7 @@ func rowToOverride(row overrideRow) (domain.Override, error) {
 	}
 	normalized, err := domain.NormalizeTraitValue(row.TraitKey, rawVal)
 	if err != nil {
+		// Return as-is if normalization fails (e.g., unknown trait)
 		normalized = rawVal
 	}
 	return domain.Override{

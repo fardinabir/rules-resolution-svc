@@ -12,6 +12,7 @@ import (
 type ResolveService interface {
 	Resolve(ctx context.Context, caseCtx domain.CaseContext) (*domain.ResolvedConfig, error)
 	Explain(ctx context.Context, caseCtx domain.CaseContext) ([]domain.TraitTrace, error)
+	ResolveBulk(ctx context.Context, contexts []domain.CaseContext) ([]domain.ResolvedConfig, error)
 }
 
 type resolveService struct {
@@ -52,4 +53,28 @@ func (s *resolveService) Explain(ctx context.Context, caseCtx domain.CaseContext
 		return nil, err
 	}
 	return domain.Explain(candidates, defaults), nil
+}
+
+func (s *resolveService) ResolveBulk(ctx context.Context, contexts []domain.CaseContext) ([]domain.ResolvedConfig, error) {
+	now := time.Now().UTC()
+	for i := range contexts {
+		if contexts[i].AsOfDate.IsZero() {
+			contexts[i].AsOfDate = now
+		}
+	}
+
+	allOverrides, err := s.overrides.FindMatchingOverridesBatch(ctx, contexts)
+	if err != nil {
+		return nil, err
+	}
+	defaults, err := s.defaults.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]domain.ResolvedConfig, len(contexts))
+	for i, caseCtx := range contexts {
+		results[i] = domain.Resolve(caseCtx, allOverrides[i], defaults)
+	}
+	return results, nil
 }
