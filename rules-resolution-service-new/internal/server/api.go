@@ -42,10 +42,11 @@ func NewAPI(opts APIServerOpts) (Server, error) {
 	}))
 
 	s := &userAPIServer{
-		port:   opts.ListenPort,
-		engine: engine,
-		log:    logger,
-		db:     dbInstance,
+		port:         opts.ListenPort,
+		engine:       engine,
+		log:          logger,
+		db:           dbInstance,
+		defaultActor: opts.Config.DefaultActor,
 	}
 
 	s.setupRoutes(engine)
@@ -75,5 +76,5 @@ func (s *userAPIServer) setupRoutes(e *echo.Echo) {
 	api.GET("/health", controller.NewHealth().Health)
 
 	controller.InitResolveRoutes(api, s.initResolveController())
-	controller.InitOverrideRoutes(api, s.initOverrideController(), RequireActor(""))
+	controller.InitOverrideRoutes(api, s.initOverrideController(), RequireActor(s.defaultActor))
 }

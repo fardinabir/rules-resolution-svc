@@ -11,10 +11,11 @@ import (
 
 // userAPIServer is the API server for User
 type userAPIServer struct {
-	port   int
-	engine *echo.Echo
-	log    *log.Entry
-	db     *gorm.DB
+	port         int
+	engine       *echo.Echo
+	log          *log.Entry
+	db           *gorm.DB
+	defaultActor string
 }
 
 func (s *userAPIServer) Name() string {

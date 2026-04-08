@@ -6,6 +6,7 @@ type Config struct {
 	APIServer     Server
 	SwaggerServer Server
 	PostgreSQL    PostgreSQL
+	DefaultActor  string
 }
 
 // Server is the configuration for the server.

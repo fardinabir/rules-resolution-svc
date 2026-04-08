@@ -13,3 +13,5 @@ postgreSQL:
   password: postgres
   dbname: user
   sslmode: disable
+
+defaultActor: admin@rrs.lawsuite.com
