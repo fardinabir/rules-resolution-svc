@@ -1,0 +1,47 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    # - bodyclose
+    # - dupl
+    - errcheck
+    # - gocritic
+    # - gocyclo
+    # - gosec
+    - govet
+    # - ineffassign
+    # - misspell
+    # - prealloc
+    # - revive
+    - staticcheck
+    # - testifylint
+    # - unconvert
+    # - unused
+    # - usestdlibvars
+    # - errcheck
+    # - govet
+    # - staticcheck
+    - unused
+  exclusions:
+    paths:
+      - docs
+
+formatters:
+  enable:
+    - gci
+    - gofumpt
+    - gofmt
+
+issues:
+  exclude-rules:
+    - path: _test.go
+      linters:
+        - dupl
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+run:
+  go: "1.25"
+  build-tags:
+    - integration
