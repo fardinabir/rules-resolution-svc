@@ -1,0 +1,534 @@
+basePath: /api
+definitions:
+  controller.BulkResolveRequest:
+    properties:
+      contexts:
+        items:
+          $ref: '#/definitions/controller.ResolveRequest'
+        type: array
+    type: object
+  controller.Error:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  controller.ResolveRequest:
+    properties:
+      asOfDate:
+        description: '"2006-01-02"'
+        example: "2026-01-15"
+        type: string
+      caseType:
+        example: judicial
+        type: string
+      client:
+        example: Chase
+        type: string
+      investor:
+        example: FNMA
+        type: string
+      state:
+        example: FL
+        type: string
+    type: object
+  controller.ResponseData:
+    properties:
+      data:
+        description: Data is the response data.
+    type: object
+  controller.ResponseError:
+    properties:
+      errors:
+        description: Errors is the response errors.
+        items:
+          $ref: '#/definitions/controller.Error'
+        type: array
+    type: object
+  controller.UpdateStatusRequest:
+    properties:
+      status:
+        type: string
+    type: object
+  domain.CaseContext:
+    properties:
+      asOfDate:
+        description: defaults to time.Now() if zero
+        type: string
+      caseType:
+        type: string
+      client:
+        type: string
+      investor:
+        type: string
+      state:
+        type: string
+    type: object
+  domain.Override:
+    properties:
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      effectiveDate:
+        type: string
+      expiresDate:
+        type: string
+      id:
+        type: string
+      selector:
+        $ref: '#/definitions/domain.Selector'
+      specificity:
+        type: integer
+      status:
+        type: string
+      stepKey:
+        type: string
+      traitKey:
+        type: string
+      updatedAt:
+        type: string
+      updatedBy:
+        type: string
+      value:
+        description: int64, bool, string, []string — determined by TraitKey
+    type: object
+  domain.ResolvedConfig:
+    properties:
+      context:
+        $ref: '#/definitions/domain.CaseContext'
+      resolvedAt:
+        type: string
+      steps:
+        additionalProperties:
+          $ref: '#/definitions/domain.ResolvedStep'
+        type: object
+    type: object
+  domain.ResolvedStep:
+    additionalProperties:
+      $ref: '#/definitions/domain.ResolvedTrait'
+    type: object
+  domain.ResolvedTrait:
+    properties:
+      overrideId:
+        type: string
+      source:
+        description: '"default" or "override"'
+        type: string
+      value: {}
+    type: object
+  domain.Selector:
+    properties:
+      caseType:
+        type: string
+      client:
+        type: string
+      investor:
+        type: string
+      state:
+        type: string
+    type: object
+  domain.TraceCandidate:
+    properties:
+      effectiveDate:
+        type: string
+      outcome:
+        description: '"SELECTED — ...", "SHADOWED — ..."'
+        type: string
+      overrideId:
+        type: string
+      selector:
+        $ref: '#/definitions/domain.Selector'
+      specificity:
+        type: integer
+      value: {}
+    type: object
+  domain.TraceSource:
+    properties:
+      effectiveDate:
+        type: string
+      overrideId:
+        type: string
+      selector:
+        $ref: '#/definitions/domain.Selector'
+      specificity:
+        type: integer
+    type: object
+  domain.TraitTrace:
+    properties:
+      candidates:
+        items:
+          $ref: '#/definitions/domain.TraceCandidate'
+        type: array
+      resolvedFrom:
+        allOf:
+        - $ref: '#/definitions/domain.TraceSource'
+        description: nil = resolved from default
+      resolvedValue: {}
+      step:
+        type: string
+      trait:
+        type: string
+    type: object
+  service.CreateOverrideRequest:
+    type: object
+  service.UpdateOverrideRequest:
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: Foreclosure rules resolution engine — resolves step and trait values
+    for a case context using a specificity-based override system.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Rules Resolution Service
+  version: "1.0"
+paths:
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controller.ResponseData'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Health check
+      tags:
+      - health
+  /overrides:
+    get:
+      parameters:
+      - description: Filter by step key
+        in: query
+        name: stepKey
+        type: string
+      - description: Filter by trait key
+        in: query
+        name: traitKey
+        type: string
+      - description: Filter by state
+        in: query
+        name: state
+        type: string
+      - description: Filter by client
+        in: query
+        name: client
+        type: string
+      - description: Filter by investor
+        in: query
+        name: investor
+        type: string
+      - description: Filter by case type
+        in: query
+        name: caseType
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: List overrides
+      tags:
+      - overrides
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create override request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateOverrideRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Override'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      security:
+      - Bearer: []
+      summary: Create override
+      tags:
+      - overrides
+  /overrides/{id}:
+    get:
+      parameters:
+      - description: Override ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Override'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Get override by ID
+      tags:
+      - overrides
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Override ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update override request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateOverrideRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Override'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      security:
+      - Bearer: []
+      summary: Update override
+      tags:
+      - overrides
+  /overrides/{id}/history:
+    get:
+      parameters:
+      - description: Override ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Get override history
+      tags:
+      - overrides
+  /overrides/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Override ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      security:
+      - Bearer: []
+      summary: Update override status
+      tags:
+      - overrides
+  /overrides/conflicts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Get conflicting overrides
+      tags:
+      - overrides
+  /resolve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Case context to resolve
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ResolveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controller.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.ResolvedConfig'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Resolve case context
+      tags:
+      - resolve
+  /resolve/bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Multiple case contexts to resolve
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.BulkResolveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Bulk resolve case contexts
+      tags:
+      - resolve
+  /resolve/explain:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Case context for trait trace
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ResolveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TraitTrace'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: Explain trait resolution
+      tags:
+      - resolve
+schemes:
+- http
+swagger: "2.0"

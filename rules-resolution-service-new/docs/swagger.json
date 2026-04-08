@@ -1,0 +1,826 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Foreclosure rules resolution engine — resolves step and trait values for a case context using a specificity-based override system.",
+        "title": "Rules Resolution Service",
+        "contact": {},
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "/api",
+    "paths": {
+        "/health": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controller.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/overrides": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "List overrides",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by step key",
+                        "name": "stepKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by trait key",
+                        "name": "traitKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by state",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by client",
+                        "name": "client",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by investor",
+                        "name": "investor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by case type",
+                        "name": "caseType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Create override",
+                "parameters": [
+                    {
+                        "description": "Create override request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateOverrideRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Override"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/overrides/conflicts": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Get conflicting overrides",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/overrides/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Get override by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Override ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Override"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Update override",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Override ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update override request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UpdateOverrideRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Override"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/overrides/{id}/history": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Get override history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Override ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/overrides/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "overrides"
+                ],
+                "summary": "Update override status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Override ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resolve": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resolve"
+                ],
+                "summary": "Resolve case context",
+                "parameters": [
+                    {
+                        "description": "Case context to resolve",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResolveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controller.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.ResolvedConfig"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resolve/bulk": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resolve"
+                ],
+                "summary": "Bulk resolve case contexts",
+                "parameters": [
+                    {
+                        "description": "Multiple case contexts to resolve",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.BulkResolveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resolve/explain": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resolve"
+                ],
+                "summary": "Explain trait resolution",
+                "parameters": [
+                    {
+                        "description": "Case context for trait trace",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResolveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.TraitTrace"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.BulkResolveRequest": {
+            "type": "object",
+            "properties": {
+                "contexts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.ResolveRequest"
+                    }
+                }
+            }
+        },
+        "controller.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.ResolveRequest": {
+            "type": "object",
+            "properties": {
+                "asOfDate": {
+                    "description": "\"2006-01-02\"",
+                    "type": "string",
+                    "example": "2026-01-15"
+                },
+                "caseType": {
+                    "type": "string",
+                    "example": "judicial"
+                },
+                "client": {
+                    "type": "string",
+                    "example": "Chase"
+                },
+                "investor": {
+                    "type": "string",
+                    "example": "FNMA"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "FL"
+                }
+            }
+        },
+        "controller.ResponseData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data is the response data."
+                }
+            }
+        },
+        "controller.ResponseError": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "description": "Errors is the response errors.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Error"
+                    }
+                }
+            }
+        },
+        "controller.UpdateStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CaseContext": {
+            "type": "object",
+            "properties": {
+                "asOfDate": {
+                    "description": "defaults to time.Now() if zero",
+                    "type": "string"
+                },
+                "caseType": {
+                    "type": "string"
+                },
+                "client": {
+                    "type": "string"
+                },
+                "investor": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Override": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "expiresDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "selector": {
+                    "$ref": "#/definitions/domain.Selector"
+                },
+                "specificity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "stepKey": {
+                    "type": "string"
+                },
+                "traitKey": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedBy": {
+                    "type": "string"
+                },
+                "value": {
+                    "description": "int64, bool, string, []string — determined by TraitKey"
+                }
+            }
+        },
+        "domain.ResolvedConfig": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "$ref": "#/definitions/domain.CaseContext"
+                },
+                "resolvedAt": {
+                    "type": "string"
+                },
+                "steps": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/domain.ResolvedStep"
+                    }
+                }
+            }
+        },
+        "domain.ResolvedStep": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/domain.ResolvedTrait"
+            }
+        },
+        "domain.ResolvedTrait": {
+            "type": "object",
+            "properties": {
+                "overrideId": {
+                    "type": "string"
+                },
+                "source": {
+                    "description": "\"default\" or \"override\"",
+                    "type": "string"
+                },
+                "value": {}
+            }
+        },
+        "domain.Selector": {
+            "type": "object",
+            "properties": {
+                "caseType": {
+                    "type": "string"
+                },
+                "client": {
+                    "type": "string"
+                },
+                "investor": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.TraceCandidate": {
+            "type": "object",
+            "properties": {
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "outcome": {
+                    "description": "\"SELECTED — ...\", \"SHADOWED — ...\"",
+                    "type": "string"
+                },
+                "overrideId": {
+                    "type": "string"
+                },
+                "selector": {
+                    "$ref": "#/definitions/domain.Selector"
+                },
+                "specificity": {
+                    "type": "integer"
+                },
+                "value": {}
+            }
+        },
+        "domain.TraceSource": {
+            "type": "object",
+            "properties": {
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "overrideId": {
+                    "type": "string"
+                },
+                "selector": {
+                    "$ref": "#/definitions/domain.Selector"
+                },
+                "specificity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.TraitTrace": {
+            "type": "object",
+            "properties": {
+                "candidates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.TraceCandidate"
+                    }
+                },
+                "resolvedFrom": {
+                    "description": "nil = resolved from default",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.TraceSource"
+                        }
+                    ]
+                },
+                "resolvedValue": {},
+                "step": {
+                    "type": "string"
+                },
+                "trait": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateOverrideRequest": {
+            "type": "object"
+        },
+        "service.UpdateOverrideRequest": {
+            "type": "object"
+        }
+    }
+}
