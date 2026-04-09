@@ -33,6 +33,21 @@ func NewOverrideHandler(svc service.OverrideService) OverrideHandler {
 	return &overrideHandler{svc: svc}
 }
 
+// @Summary      List overrides
+// @Tags         overrides
+// @Produce      json
+// @Param        stepKey     query   string  false   "Filter by step key"
+// @Param        traitKey    query   string  false   "Filter by trait key"
+// @Param        state       query   string  false   "Filter by state"
+// @Param        client      query   string  false   "Filter by client"
+// @Param        investor    query   string  false   "Filter by investor"
+// @Param        caseType    query   string  false   "Filter by case type"
+// @Param        status      query   string  false   "Filter by status"
+// @Param        page        query   int     false   "Page number" default(1)
+// @Param        pageSize    query   int     false   "Page size" default(50)
+// @Success      200         {object}    map[string]interface{}
+// @Failure      500         {object}    ResponseError
+// @Router       /overrides [get]
 func (h *overrideHandler) List(c echo.Context) error {
 	f := service.OverrideFilter{Page: 1, PageSize: 50}
 	if v := c.QueryParam("stepKey"); v != "" {
@@ -79,6 +94,14 @@ func (h *overrideHandler) List(c echo.Context) error {
 	})
 }
 
+// @Summary      Get override by ID
+// @Tags         overrides
+// @Produce      json
+// @Param        id  path    string  true    "Override ID"
+// @Success      200 {object}    domain.Override
+// @Failure      404 {object}    ResponseError
+// @Failure      500 {object}    ResponseError
+// @Router       /overrides/{id} [get]
 func (h *overrideHandler) GetByID(c echo.Context) error {
 	id := c.Param("id")
 	o, err := h.svc.GetByID(c.Request().Context(), id)
@@ -95,6 +118,16 @@ func (h *overrideHandler) GetByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, o)
 }
 
+// @Summary      Create override
+// @Tags         overrides
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        request body    service.CreateOverrideRequest   true    "Create override request"
+// @Success      201     {object}    domain.Override
+// @Failure      400     {object}    ResponseError
+// @Failure      500     {object}    ResponseError
+// @Router       /overrides [post]
 func (h *overrideHandler) Create(c echo.Context) error {
 	actor, _ := c.Get("actor").(string)
 	var req service.CreateOverrideRequest
@@ -112,6 +145,18 @@ func (h *overrideHandler) Create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, o)
 }
 
+// @Summary      Update override
+// @Tags         overrides
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        id      path    string                              true    "Override ID"
+// @Param        request body    service.UpdateOverrideRequest       true    "Update override request"
+// @Success      200     {object}    domain.Override
+// @Failure      400     {object}    ResponseError
+// @Failure      404     {object}    ResponseError
+// @Failure      500     {object}    ResponseError
+// @Router       /overrides/{id} [put]
 func (h *overrideHandler) Update(c echo.Context) error {
 	actor, _ := c.Get("actor").(string)
 	id := c.Param("id")
@@ -135,14 +180,27 @@ func (h *overrideHandler) Update(c echo.Context) error {
 	return c.JSON(http.StatusOK, o)
 }
 
-type updateStatusRequest struct {
+// UpdateStatusRequest is the input for PATCH /api/overrides/:id/status.
+type UpdateStatusRequest struct {
 	Status string `json:"status"`
 }
 
+// @Summary      Update override status
+// @Tags         overrides
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        id      path    string                  true    "Override ID"
+// @Param        request body    UpdateStatusRequest     true    "Status update request"
+// @Success      204
+// @Failure      400     {object}    ResponseError
+// @Failure      404     {object}    ResponseError
+// @Failure      500     {object}    ResponseError
+// @Router       /overrides/{id}/status [patch]
 func (h *overrideHandler) UpdateStatus(c echo.Context) error {
 	actor, _ := c.Get("actor").(string)
 	id := c.Param("id")
-	var req updateStatusRequest
+	var req UpdateStatusRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, ResponseError{
 			Errors: []Error{{Code: apierrors.CodeBadRequest, Message: err.Error()}},
@@ -167,6 +225,13 @@ func (h *overrideHandler) UpdateStatus(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// @Summary      Get override history
+// @Tags         overrides
+// @Produce      json
+// @Param        id  path    string  true    "Override ID"
+// @Success      200 {object}    map[string]interface{}
+// @Failure      500 {object}    ResponseError
+// @Router       /overrides/{id}/history [get]
 func (h *overrideHandler) GetHistory(c echo.Context) error {
 	id := c.Param("id")
 	history, err := h.svc.GetHistory(c.Request().Context(), id)
@@ -178,6 +243,12 @@ func (h *overrideHandler) GetHistory(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"history": history})
 }
 
+// @Summary      Get conflicting overrides
+// @Tags         overrides
+// @Produce      json
+// @Success      200 {object}    map[string]interface{}
+// @Failure      500 {object}    ResponseError
+// @Router       /overrides/conflicts [get]
 func (h *overrideHandler) GetConflicts(c echo.Context) error {
 	conflicts, err := h.svc.GetConflicts(c.Request().Context())
 	if err != nil {

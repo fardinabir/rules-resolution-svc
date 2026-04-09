@@ -161,7 +161,7 @@ Each transition is validated in `OverrideService.UpdateStatus` and recorded in `
 
 **Run once after migrations:**
 ```bash
-DATABASE_URL=postgres://postgres:postgres@localhost:5433/user?sslmode=disable \
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/user?sslmode=disable \
 DATA_DIR=../../sr_backend_assignment_data \
 go run ./scripts/seed/main.go
 ```
