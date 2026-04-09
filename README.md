@@ -59,7 +59,7 @@ Strict layered design with interfaces at every boundary. Dependency injection wi
 
 ### Docker Compose
 
-Starts Postgres, Redis, and the app. No local Go or Postgres installation required.
+Starts Postgres, Redis, and the app. The API server and Swagger Server will spin up.
 
 ```bash
 # 1. Start all services
@@ -71,10 +71,10 @@ curl http://localhost:8082/api/health
 
 The app waits for Postgres and Redis health checks before starting. Migrations run automatically on startup inside the container.
 
-| Endpoint | URL |
-|---|---|
-| API | `http://localhost:8082` |
-| Swagger UI | `http://localhost:1315/swagger/index.html` |
+| Endpoint | URL                                        |
+|---|--------------------------------------------|
+| API | `http://localhost:8082`                    |
+| Swagger UI | `http://localhost:1314/swagger/index.html` |
 
 ### Configuration
 
@@ -105,7 +105,7 @@ defaultActor: admin@rrs.lawsuite.com
 A shell script exercises every endpoint end-to-end against a running service:
 
 ```bash
-# Start the service first (make serve or docker-compose up -d)
+# Start the service first (make start or docker-compose up -d)
 bash scripts/test-all-apis.sh
 ```
 

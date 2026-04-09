@@ -99,11 +99,11 @@ fmt:
 
 .PHONY: test
 test: reset-test-db
-	gotestsum --format=testname --rerun-fails
+	$(shell go env GOPATH)/bin/gotestsum --format=testname --rerun-fails
 
 .PHONY: test-ci
 test-ci: reset-test-db
-	gotestsum --format=testname -- -cover -coverprofile=coverage.out ./...
+	$(shell go env GOPATH)/bin/gotestsum --format=testname -- -cover -coverprofile=coverage.out ./...
 
 .PHONY: curl-test
 curl-test:
