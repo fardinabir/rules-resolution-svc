@@ -47,6 +47,14 @@ Strict layered design with interfaces at every boundary. Dependency injection wi
 
 ---
 
+## Prerequisites
+
+- **Go 1.25+** — required for building the service and running `make setup` (tool installation depends on Go 1.25)
+- **Docker & Docker Compose** — required for the recommended Docker Compose setup
+- PostgreSQL 15+ and Redis 7+ are only needed for local (non-Docker) development
+
+---
+
 ## Running the Service
 
 ### Docker Compose
@@ -92,18 +100,6 @@ defaultActor: admin@rrs.lawsuite.com
 
 ## Testing
 
-### Go tests (unit + integration)
-
-Integration tests run against a real Postgres database (auto-provisioned). The `test_scenarios.json` file is the acceptance test suite — all 12 scenarios must pass.
-
-```bash
-# Provision test DB, run all tests with coverage
-make test
-
-# CI mode (generates coverage.out)
-make test-ci
-```
-
 ### CURL-based API test (Easier)
 
 A shell script exercises every endpoint end-to-end against a running service:
@@ -114,6 +110,22 @@ bash scripts/test-all-apis.sh
 ```
 
 The script tests health, single resolve, explain, bulk resolve, override CRUD, conflict detection, audit history, and X-Actor middleware — with pass/fail output for each case.
+
+### Go tests (Unit + Integration)
+
+Integration tests run against a real Postgres database (auto-provisioned). The `test_scenarios.json` file is the acceptance test suite — all 12 scenarios must pass.
+
+```bash
+#Setup tools and utils 
+make setup
+
+# Provision test DB, run all tests with coverage
+make test
+
+# CI mode (generates coverage.out)
+make test-ci
+```
+
 
 ---
 
@@ -198,10 +210,11 @@ curl -s -X POST http://localhost:8082/api/resolve/bulk \
 
 | Command | Effect |
 |---|---|
+| `make setup` | Install all required CLI tools (gotestsum, golangci-lint, swag) |
 | `make serve` | Start the API server locally |
 | `make migrate` | Run DDL migrations against local DB |
 | `make seed` | Seed steps, defaults, and 49 overrides |
-| `make setup` | migrate + seed in one step |
+| `make db-setup` | migrate + seed in one step |
 | `make test` | Reset test DB and run all tests |
 | `make test-ci` | Test with coverage report |
 | `make curl-test` | Run curl-based end-to-end API tests |

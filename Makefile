@@ -22,6 +22,10 @@ override LDFLAGS += \
   -X ${COMMON_PACKAGE}.buildDate=${BUILD_DATE} \
   -X ${COMMON_PACKAGE}.gitCommit=${GIT_COMMIT} \
 
+GOTESTSUM_VERSION   := v1.13.0
+GOLANGCI_VERSION    := v2.8.0
+SWAG_VERSION        := v1.16.3
+
 DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/user?sslmode=disable
 DATA_DIR ?= ./seed_data
 
@@ -54,7 +58,17 @@ seed-test:
 	DATABASE_URL="postgres://postgres:postgres@localhost:5432/user_test?sslmode=disable" DATA_DIR=$(DATA_DIR) go run ./scripts/seed/main.go
 
 .PHONY: setup
-setup: migrate seed
+setup:
+	@echo "Installing gotestsum $(GOTESTSUM_VERSION)..."
+	go install gotest.tools/gotestsum@$(GOTESTSUM_VERSION)
+	@echo "Installing golangci-lint $(GOLANGCI_VERSION)..."
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
+	@echo "Installing swag $(SWAG_VERSION)..."
+	go install github.com/swaggo/swag/cmd/swag@$(SWAG_VERSION)
+	@echo "All tools installed. Run 'make db-setup' to migrate and seed the database."
+
+.PHONY: db-setup
+db-setup: migrate seed
 
 ## ── Docker Compose ──────────────────────────────────────────────────────────
 .PHONY: start
