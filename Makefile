@@ -91,6 +91,10 @@ test: reset-test-db
 test-ci: reset-test-db
 	gotestsum --format=testname -- -cover -coverprofile=coverage.out ./...
 
+.PHONY: curl-test
+curl-test:
+	bash scripts/test-all-apis.sh
+
 # Go files to check during build
 SWAG_GO_FILES:=$(shell find internal/controller -type f -name '*.go' -print)
 

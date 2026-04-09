@@ -204,6 +204,7 @@ curl -s -X POST http://localhost:8082/api/resolve/bulk \
 | `make setup` | migrate + seed in one step |
 | `make test` | Reset test DB and run all tests |
 | `make test-ci` | Test with coverage report |
+| `make curl-test` | Run curl-based end-to-end API tests |
 | `make start` | `docker-compose up -d` |
 | `make stop` | `docker-compose down` |
 | `make clear` | Tear down containers + volumes |
@@ -252,6 +253,13 @@ make swagger   # runs swag init → generates docs/ → builds swagger.html
 ```
 ---
 
+
+## Documentation
+
+- [APPROACH.md](APPROACH.md) — Schema design decisions, resolution algorithm, complexity analysis, edge case handling, and what would be added with more time.
+- [TEST_EVALUATION.md](TEST_EVALUATION.md) — Test coverage breakdown, scenario validation details, and how the 12 acceptance scenarios map to the resolution algorithm.
+
+---
 ## Closing Note
 
 This service is a **demonstration implementation** of a specificity-based rules resolution engine for foreclosure case configuration — not a production-ready foreclosure settlement platform.
