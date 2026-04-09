@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/fardinabir/go-svc-boilerplate/cmd"
-	_ "github.com/fardinabir/go-svc-boilerplate/docs"
+	"github.com/fardinabir/rules-resolution-svc/cmd"
+	_ "github.com/fardinabir/rules-resolution-svc/docs"
 )
 
 // @title         Rules Resolution Service

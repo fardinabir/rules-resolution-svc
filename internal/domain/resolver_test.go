@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
 )
 
 func strPtr(s string) *string { return &s }

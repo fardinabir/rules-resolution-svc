@@ -4,7 +4,7 @@ package db
 import (
 	"fmt"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/model"
+	"github.com/fardinabir/rules-resolution-svc/internal/model"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

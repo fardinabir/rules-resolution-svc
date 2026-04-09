@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_overrides_resolution
 
 CREATE INDEX IF NOT EXISTS idx_overrides_conflict
     ON overrides (step_key, trait_key, specificity)
-    WHERE status != 'archived';
+    WHERE status = 'active';
 
 CREATE INDEX IF NOT EXISTS idx_overrides_status ON overrides (status);
 

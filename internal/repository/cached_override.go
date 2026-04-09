@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/cache"
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/cache"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/cache"
-	"github.com/fardinabir/go-svc-boilerplate/internal/controller"
-	"github.com/fardinabir/go-svc-boilerplate/internal/db"
-	"github.com/fardinabir/go-svc-boilerplate/internal/model"
-	"github.com/fardinabir/go-svc-boilerplate/internal/repository"
-	"github.com/fardinabir/go-svc-boilerplate/internal/service"
-	"github.com/fardinabir/go-svc-boilerplate/internal/utils"
+	"github.com/fardinabir/rules-resolution-svc/internal/controller"
+	"github.com/fardinabir/rules-resolution-svc/internal/db"
+	"github.com/fardinabir/rules-resolution-svc/internal/model"
+	"github.com/fardinabir/rules-resolution-svc/internal/repository"
+	"github.com/fardinabir/rules-resolution-svc/internal/service"
+	"github.com/fardinabir/rules-resolution-svc/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
@@ -41,7 +40,7 @@ func NewAPI(opts APIServerOpts) (Server, error) {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-Actor"},
 	}))
 
-	s := &userAPIServer{
+	s := &apiServer{
 		engine: engine,
 		log:    logger,
 		db:     dbInstance,
@@ -55,39 +54,8 @@ func NewAPI(opts APIServerOpts) (Server, error) {
 	return s, nil
 }
 
-// initCache connects to Redis and returns a Cache. Falls back to NoopCache if Redis
-// is not configured or unavailable so the service starts without caching.
-func initCache(cfg model.Redis) cache.Cache {
-	if cfg.Host == "" {
-		log.Info("Redis not configured — running without cache")
-		return cache.NoopCache{}
-	}
-
-	rc, err := cache.NewRedisCache(cache.RedisConfig{
-		Host:     cfg.Host,
-		Port:     cfg.Port,
-		Password: cfg.Password,
-		DB:       cfg.DB,
-	})
-	if err != nil {
-		log.WithError(err).Warn("Redis unavailable — running without cache")
-		return cache.NoopCache{}
-	}
-
-	log.Info("Redis cache connected")
-	return rc
-}
-
-// ttlOr returns d if non-zero, otherwise fallback.
-func ttlOr(d, fallback time.Duration) time.Duration {
-	if d == 0 {
-		return fallback
-	}
-	return d
-}
-
 // initResolveController wires OverrideRepository + DefaultRepository → ResolveService → ResolveHandler.
-func (s *userAPIServer) initResolveController() controller.ResolveHandler {
+func (s *apiServer) initResolveController() controller.ResolveHandler {
 	overrideRepo := repository.NewCachedOverrideRepository(
 		repository.NewOverrideRepository(s.db), s.cache,
 		ttlOr(s.cfg.Redis.OverrideTTL, 5*time.Minute))
@@ -98,7 +66,7 @@ func (s *userAPIServer) initResolveController() controller.ResolveHandler {
 }
 
 // initOverrideController wires OverrideRepository → OverrideService → OverrideHandler.
-func (s *userAPIServer) initOverrideController() controller.OverrideHandler {
+func (s *apiServer) initOverrideController() controller.OverrideHandler {
 	overrideRepo := repository.NewCachedOverrideRepository(
 		repository.NewOverrideRepository(s.db), s.cache,
 		ttlOr(s.cfg.Redis.OverrideTTL, 5*time.Minute))
@@ -106,7 +74,7 @@ func (s *userAPIServer) initOverrideController() controller.OverrideHandler {
 }
 
 // setupRoutes registers all routes for the application.
-func (s *userAPIServer) setupRoutes(e *echo.Echo) {
+func (s *apiServer) setupRoutes(e *echo.Echo) {
 	e.Validator = controller.NewCustomValidator()
 
 	api := e.Group("/api")

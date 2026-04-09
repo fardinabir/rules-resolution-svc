@@ -9,7 +9,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
 )
 
 // OverrideRepository defines all DB operations for the overrides table.
@@ -479,8 +479,8 @@ func (r *pgOverrideRepo) FindConflicts(ctx context.Context) ([]domain.ConflictPa
 		    AND a.step_key    = b.step_key
 		    AND a.trait_key   = b.trait_key
 		    AND a.specificity = b.specificity
-		WHERE a.status != 'archived'
-		  AND b.status != 'archived'
+		WHERE a.status = 'active'
+		  AND b.status = 'active'
 		  AND a.effective_date < COALESCE(b.expires_date, 'infinity'::date)
 		  AND b.effective_date < COALESCE(a.expires_date, 'infinity'::date)
 		  AND NOT (a.state     IS NOT NULL AND b.state     IS NOT NULL AND a.state     != b.state)

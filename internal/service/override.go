@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
-	"github.com/fardinabir/go-svc-boilerplate/internal/repository"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/repository"
 )
 
 // OverrideService handles override CRUD, validation, and conflict detection.

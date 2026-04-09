@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/model"
-	"github.com/fardinabir/go-svc-boilerplate/internal/server"
+	"github.com/fardinabir/rules-resolution-svc/internal/model"
+	"github.com/fardinabir/rules-resolution-svc/internal/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

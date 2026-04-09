@@ -3,7 +3,7 @@ package server
 import (
 	"testing"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/model"
+	"github.com/fardinabir/rules-resolution-svc/internal/model"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -74,10 +74,10 @@ func TestNewAPI(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.NotNil(t, server)
-				assert.Equal(t, tt.opts.ListenPort, server.(*userAPIServer).cfg.APIServer.Port)
-				assert.IsType(t, &echo.Echo{}, server.(*userAPIServer).engine)
-				assert.IsType(t, &log.Entry{}, server.(*userAPIServer).log)
-				assert.IsType(t, &gorm.DB{}, server.(*userAPIServer).db)
+				assert.Equal(t, tt.opts.ListenPort, server.(*apiServer).cfg.APIServer.Port)
+				assert.IsType(t, &echo.Echo{}, server.(*apiServer).engine)
+				assert.IsType(t, &log.Entry{}, server.(*apiServer).log)
+				assert.IsType(t, &gorm.DB{}, server.(*apiServer).db)
 			}
 		})
 	}

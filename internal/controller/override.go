@@ -7,9 +7,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
-	apierrors "github.com/fardinabir/go-svc-boilerplate/internal/errors"
-	"github.com/fardinabir/go-svc-boilerplate/internal/service"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
+	apierrors "github.com/fardinabir/rules-resolution-svc/internal/errors"
+	"github.com/fardinabir/rules-resolution-svc/internal/service"
 )
 
 // OverrideHandler handles all /api/overrides endpoints.

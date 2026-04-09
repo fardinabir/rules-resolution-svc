@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/model"
+	"github.com/fardinabir/rules-resolution-svc/internal/model"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
