@@ -20,7 +20,7 @@ func main() {
 	}
 	dataDir := os.Getenv("DATA_DIR")
 	if dataDir == "" {
-		dataDir = "../../sr_backend_assignment_data"
+		dataDir = "./sr_backend_assignment_data"
 	}
 
 	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})

@@ -276,7 +276,7 @@ func overrideToMap(o domain.Override) map[string]any {
 		"id": o.ID, "stepKey": o.StepKey, "traitKey": o.TraitKey,
 		"specificity": o.Specificity, "value": o.Value,
 		"effectiveDate": o.EffectiveDate.Format("2006-01-02"),
-		"status": o.Status, "description": o.Description,
+		"status":        o.Status, "description": o.Description,
 		"createdAt": o.CreatedAt, "createdBy": o.CreatedBy,
 		"updatedAt": o.UpdatedAt, "updatedBy": o.UpdatedBy,
 	}

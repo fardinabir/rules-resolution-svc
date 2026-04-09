@@ -24,7 +24,7 @@ import (
 func dataDir() string {
 	_, filename, _, _ := runtime.Caller(0)
 	// internal/controller/ → ../.. → rules-resolution-service-new/ → .. → sr_backend_assignment/ → sr_backend_assignment_data/
-	return filepath.Join(filepath.Dir(filename), "..", "..", "..", "sr_backend_assignment_data")
+	return filepath.Join(filepath.Dir(filename), "..", "..", "sr_backend_assignment_data")
 }
 
 // --- JSON shapes for scenario file parsing ---
