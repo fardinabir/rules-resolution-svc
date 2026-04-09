@@ -48,7 +48,6 @@ reset-test-db:
 	PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "DROP DATABASE IF EXISTS user_test;"
 	PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "CREATE DATABASE user_test WITH TEMPLATE = template0 OWNER = postgres ENCODING = 'UTF8';"
 	make migrate-test
-	make seed-test
 
 .PHONY: seed-test
 seed-test:

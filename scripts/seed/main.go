@@ -28,6 +28,13 @@ func main() {
 		log.Fatalf("connect db: %v", err)
 	}
 
+	// Skip if the DML migration already seeded the data.
+	var stepCount int64
+	if err := db.Raw("SELECT COUNT(*) FROM steps").Scan(&stepCount).Error; err == nil && stepCount > 0 {
+		fmt.Printf("Seed data already present (%d steps found) — loaded by DML migration. Skipping.\n", stepCount)
+		return
+	}
+
 	if err := seedSteps(db, dataDir); err != nil {
 		log.Fatalf("seed steps: %v", err)
 	}
