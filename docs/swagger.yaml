@@ -49,6 +49,7 @@ definitions:
   controller.UpdateStatusRequest:
     properties:
       status:
+        example: active
         type: string
     type: object
   domain.CaseContext:
@@ -123,12 +124,16 @@ definitions:
   domain.Selector:
     properties:
       caseType:
+        example: FC-Judicial
         type: string
       client:
+        example: Chase
         type: string
       investor:
+        example: FHA
         type: string
       state:
+        example: FL
         type: string
     type: object
   domain.TraceCandidate:
@@ -174,8 +179,53 @@ definitions:
         type: string
     type: object
   service.CreateOverrideRequest:
+    properties:
+      description:
+        example: Chase FL filing — 10-day deadline
+        type: string
+      effectiveDate:
+        example: "2025-06-01"
+        type: string
+      expiresDate:
+        example: "2026-06-01"
+        type: string
+      selector:
+        $ref: '#/definitions/domain.Selector'
+      status:
+        example: active
+        type: string
+      stepKey:
+        example: file-complaint
+        type: string
+      traitKey:
+        example: slaHours
+        type: string
+      value:
+        example: "240"
+        type: string
     type: object
   service.UpdateOverrideRequest:
+    properties:
+      description:
+        example: Chase FL filing — updated deadline
+        type: string
+      effectiveDate:
+        example: "2025-06-01"
+        type: string
+      expiresDate:
+        example: "2026-06-01"
+        type: string
+      selector:
+        $ref: '#/definitions/domain.Selector'
+      stepKey:
+        example: serve-borrower
+        type: string
+      traitKey:
+        example: assignedRole
+        type: string
+      value:
+        example: '"attorney"'
+        type: string
     type: object
 host: localhost:8082
 info:

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
-	"github.com/fardinabir/go-svc-boilerplate/internal/repository"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/repository"
 )
 
 // ResolveService orchestrates resolution: fetch overrides + defaults, run pure resolver.

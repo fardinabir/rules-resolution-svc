@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	db2 "github.com/fardinabir/go-svc-boilerplate/internal/db"
-	"github.com/fardinabir/go-svc-boilerplate/internal/repository"
-	"github.com/fardinabir/go-svc-boilerplate/internal/service"
+	db2 "github.com/fardinabir/rules-resolution-svc/internal/db"
+	"github.com/fardinabir/rules-resolution-svc/internal/repository"
+	"github.com/fardinabir/rules-resolution-svc/internal/service"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -147,7 +147,6 @@ func setupScenariosTest(t *testing.T) ResolveHandler {
 
 	dbInstance, err := db2.NewTestDB()
 	require.NoError(t, err, "create test DB")
-	require.NoError(t, db2.Migrate(dbInstance), "run migrations")
 
 	seedProductionData(t, dbInstance)
 

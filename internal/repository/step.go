@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
 )
 
 // StepRepository loads the steps reference table.

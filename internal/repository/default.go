@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/domain"
+	"github.com/fardinabir/rules-resolution-svc/internal/domain"
 )
 
 // DefaultRepository loads the defaults reference table.

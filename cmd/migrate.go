@@ -4,7 +4,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/fardinabir/go-svc-boilerplate/internal/db"
+	"github.com/fardinabir/rules-resolution-svc/internal/db"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
