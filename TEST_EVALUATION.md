@@ -74,7 +74,7 @@ All integration tests follow a **table-driven pattern**: test cases are declared
 **Setup Helpers:**
 - `setupOverrideTest()` — initializes DB, runs migrations, truncates mutable tables, wires handler
 - `setupResolveTest()` — same, plus seeds a hand-rolled 5-override fixture
-- `setupScenariosTest()` — seeds full production dataset from `sr_backend_assignment_data/`
+- `setupScenariosTest()` — seeds full production dataset from `seed_data/`
 - `cleanDB()` — TRUNCATE on `overrides` + `override_history` for test isolation
 
 **Key Helper Functions:**

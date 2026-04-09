@@ -60,7 +60,7 @@ rules-resolution-service/
 ├── scripts/
 │   └── seed/
 │       └── main.go              # reads JSON files, inserts seed data
-├── sr_backend_assignment_data/  # (existing)
+├── seed_data/  # (existing)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── go.mod

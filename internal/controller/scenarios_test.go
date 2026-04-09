@@ -20,11 +20,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// dataDir resolves the path to sr_backend_assignment_data/ relative to this file.
+// dataDir resolves the path to seed_data/ relative to this file.
 func dataDir() string {
 	_, filename, _, _ := runtime.Caller(0)
-	// internal/controller/ → ../.. → rules-resolution-service-new/ → .. → sr_backend_assignment/ → sr_backend_assignment_data/
-	return filepath.Join(filepath.Dir(filename), "..", "..", "sr_backend_assignment_data")
+	// internal/controller/ → ../.. → rules-resolution-service-new/ → .. → sr_backend_assignment/ → seed_data/
+	return filepath.Join(filepath.Dir(filename), "..", "..", "seed_data")
 }
 
 // --- JSON shapes for scenario file parsing ---

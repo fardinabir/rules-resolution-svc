@@ -39,7 +39,7 @@ Strict layered design with interfaces at every boundary. Dependency injection wi
 │   └── db/                 # DB connection, migration runner
 ├── migrations/ddl/         # PostgreSQL schema migrations
 ├── scripts/seed/           # Standalone seed binary
-├── sr_backend_assignment_data/  # steps.json, defaults.json, overrides.json, test_scenarios.json
+├── seed_data/  # steps.json, defaults.json, overrides.json, test_scenarios.json
 ├── config.yaml             # Local config
 ├── config.docker.yaml      # Docker Compose config
 └── docker-compose.yml      # Postgres + Redis + app

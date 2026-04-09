@@ -23,7 +23,7 @@ override LDFLAGS += \
   -X ${COMMON_PACKAGE}.gitCommit=${GIT_COMMIT} \
 
 DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/user?sslmode=disable
-DATA_DIR ?= ./sr_backend_assignment_data
+DATA_DIR ?= ./seed_data
 
 .PHONY: seed
 seed:
