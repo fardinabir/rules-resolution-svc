@@ -25,25 +25,25 @@ type OverrideService interface {
 
 // CreateOverrideRequest is the input DTO for creating an override.
 type CreateOverrideRequest struct {
-	StepKey       string          `json:"stepKey"`
-	TraitKey      string          `json:"traitKey"`
+	StepKey       string          `json:"stepKey"       example:"file-complaint"`
+	TraitKey      string          `json:"traitKey"      example:"slaHours"`
 	Selector      domain.Selector `json:"selector"`
-	Value         json.RawMessage `json:"value"`
-	EffectiveDate string          `json:"effectiveDate"` // "2006-01-02"
-	ExpiresDate   *string         `json:"expiresDate,omitempty"`
-	Status        string          `json:"status"` // "draft" or "active"
-	Description   string          `json:"description"`
+	Value         json.RawMessage `json:"value"         swaggertype:"string" example:"240"`
+	EffectiveDate string          `json:"effectiveDate" example:"2025-06-01"`
+	ExpiresDate   *string         `json:"expiresDate,omitempty" example:"2026-06-01"`
+	Status        string          `json:"status"        example:"active"`
+	Description   string          `json:"description"   example:"Chase FL filing — 10-day deadline"`
 }
 
 // UpdateOverrideRequest is the input DTO for updating an override.
 type UpdateOverrideRequest struct {
-	StepKey       string          `json:"stepKey"`
-	TraitKey      string          `json:"traitKey"`
+	StepKey       string          `json:"stepKey"       example:"serve-borrower"`
+	TraitKey      string          `json:"traitKey"      example:"assignedRole"`
 	Selector      domain.Selector `json:"selector"`
-	Value         json.RawMessage `json:"value"`
-	EffectiveDate string          `json:"effectiveDate"`
-	ExpiresDate   *string         `json:"expiresDate,omitempty"`
-	Description   string          `json:"description"`
+	Value         json.RawMessage `json:"value"         swaggertype:"string" example:"\"attorney\""`
+	EffectiveDate string          `json:"effectiveDate" example:"2025-06-01"`
+	ExpiresDate   *string         `json:"expiresDate,omitempty" example:"2026-06-01"`
+	Description   string          `json:"description"   example:"Chase FL filing — updated deadline"`
 }
 
 // OverrideFilter holds optional query parameters for listing overrides.
@@ -62,8 +62,8 @@ type OverrideFilter struct {
 
 var validTransitions = map[string][]string{
 	"draft":    {"active", "archived"},
-	"active":   {"archived"},
-	"archived": {},
+	"active":   {"archived", "draft"},
+	"archived": {"active", "draft"},
 }
 
 type overrideService struct {

@@ -24,10 +24,10 @@ type CaseContext struct {
 // Selector holds the 0–4 pinned dimensions of an override rule.
 // A nil field is a wildcard — it matches any value in that dimension.
 type Selector struct {
-	State    *string `json:"state,omitempty"`
-	Client   *string `json:"client,omitempty"`
-	Investor *string `json:"investor,omitempty"`
-	CaseType *string `json:"caseType,omitempty"`
+	State    *string `json:"state,omitempty"    example:"FL"`
+	Client   *string `json:"client,omitempty"   example:"Chase"`
+	Investor *string `json:"investor,omitempty" example:"FHA"`
+	CaseType *string `json:"caseType,omitempty" example:"FC-Judicial"`
 }
 
 // Specificity returns the count of non-nil selector dimensions (0–4).

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS overrides (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by      TEXT NOT NULL,
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      TEXT,
+    updated_by      TEXT NOT NULL,
 
     CONSTRAINT valid_date_range CHECK (expires_date IS NULL OR expires_date > effective_date)
 );

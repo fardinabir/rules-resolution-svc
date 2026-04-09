@@ -182,7 +182,7 @@ func (h *overrideHandler) Update(c echo.Context) error {
 
 // UpdateStatusRequest is the input for PATCH /api/overrides/:id/status.
 type UpdateStatusRequest struct {
-	Status string `json:"status"`
+	Status string `json:"status" example:"active"`
 }
 
 // @Summary      Update override status

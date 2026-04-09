@@ -626,7 +626,8 @@
             "type": "object",
             "properties": {
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "active"
                 }
             }
         },
@@ -738,16 +739,20 @@
             "type": "object",
             "properties": {
                 "caseType": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "FC-Judicial"
                 },
                 "client": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Chase"
                 },
                 "investor": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "FHA"
                 },
                 "state": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "FL"
                 }
             }
         },
@@ -817,10 +822,72 @@
             }
         },
         "service.CreateOverrideRequest": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Chase FL filing — 10-day deadline"
+                },
+                "effectiveDate": {
+                    "type": "string",
+                    "example": "2025-06-01"
+                },
+                "expiresDate": {
+                    "type": "string",
+                    "example": "2026-06-01"
+                },
+                "selector": {
+                    "$ref": "#/definitions/domain.Selector"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "stepKey": {
+                    "type": "string",
+                    "example": "file-complaint"
+                },
+                "traitKey": {
+                    "type": "string",
+                    "example": "slaHours"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "240"
+                }
+            }
         },
         "service.UpdateOverrideRequest": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Chase FL filing — updated deadline"
+                },
+                "effectiveDate": {
+                    "type": "string",
+                    "example": "2025-06-01"
+                },
+                "expiresDate": {
+                    "type": "string",
+                    "example": "2026-06-01"
+                },
+                "selector": {
+                    "$ref": "#/definitions/domain.Selector"
+                },
+                "stepKey": {
+                    "type": "string",
+                    "example": "serve-borrower"
+                },
+                "traitKey": {
+                    "type": "string",
+                    "example": "assignedRole"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "\"attorney\""
+                }
+            }
         }
     }
 }
