@@ -333,9 +333,10 @@ func TestOverrideHandler_NotFound(t *testing.T) {
 	})
 }
 
-// TestOverrideHandler_InvalidStatusTransitions verifies that the state machine
-// rejects illegal transitions (archived is terminal; active cannot go back to draft).
-func TestOverrideHandler_InvalidStatusTransitions(t *testing.T) {
+// TestOverrideHandler_StatusTransitions verifies the open status state machine:
+// all cross-status transitions are allowed (draft↔active↔archived in any direction).
+// Only self-transitions (same→same) and unknown status values are rejected.
+func TestOverrideHandler_StatusTransitions(t *testing.T) {
 	setup := setupOverrideTest(t)
 	e := setup.echo
 	handler := setup.handler
@@ -356,7 +357,6 @@ func TestOverrideHandler_InvalidStatusTransitions(t *testing.T) {
 		return rec.Code
 	}
 
-	// Seed a draft override, walk it through the full valid path, then assert invalid ones.
 	require.NoError(t, overrideRepo.Create(ctx, domain.Override{
 		ID: "ovr-sm-001", StepKey: "title-search", TraitKey: "slaHours",
 		Selector: domain.Selector{State: ptrString("OR")}, Specificity: 1,
@@ -364,12 +364,18 @@ func TestOverrideHandler_InvalidStatusTransitions(t *testing.T) {
 		Status: "draft", CreatedBy: "test", UpdatedBy: "test",
 	}))
 
-	// Invalid: draft → (nothing invalid yet, but active→draft is invalid)
+	// All cross-status transitions are valid.
 	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "active"), "draft→active must succeed")
-	assert.Equal(t, http.StatusBadRequest, patch("ovr-sm-001", "draft"), "active→draft must be rejected")
-	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "archived"), "active→archived must succeed")
-	assert.Equal(t, http.StatusBadRequest, patch("ovr-sm-001", "active"), "archived→active must be rejected (terminal)")
-	assert.Equal(t, http.StatusBadRequest, patch("ovr-sm-001", "draft"), "archived→draft must be rejected (terminal)")
+	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "draft"), "active→draft must succeed")
+	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "archived"), "draft→archived must succeed")
+	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "active"), "archived→active must succeed")
+	assert.Equal(t, http.StatusNoContent, patch("ovr-sm-001", "draft"), "active→draft must succeed")
+
+	// Self-transitions (same→same) are rejected — not a meaningful operation.
+	assert.Equal(t, http.StatusBadRequest, patch("ovr-sm-001", "draft"), "draft→draft self-transition must be rejected")
+
+	// Unknown status values are rejected.
+	assert.Equal(t, http.StatusBadRequest, patch("ovr-sm-001", "pending"), "unknown status must be rejected")
 }
 
 // TestOverrideHandler_Update verifies that PUT updates the override's fields and
@@ -764,7 +770,8 @@ func TestOverrideHandler_CombinedFiltering(t *testing.T) {
 // TestOverrideHandler_DuplicateCreation verifies the design decision: the API allows creating
 // two overrides with identical selector/step/trait (IDs are always auto-generated), and the
 // conflict detection endpoint is responsible for surfacing the resulting ambiguity.
-// This also validates that draft+active pairs at the same specificity are caught by /conflicts.
+// Conflict detection operates on active overrides only — two active overrides at the same
+// specificity, selector, and overlapping date ranges constitute a genuine conflict.
 func TestOverrideHandler_DuplicateCreation(t *testing.T) {
 	setup := setupOverrideTest(t)
 	e := setup.echo
@@ -780,15 +787,16 @@ func TestOverrideHandler_DuplicateCreation(t *testing.T) {
 		Status: "active", CreatedBy: "test", UpdatedBy: "test",
 	}))
 
-	// Create a second override with identical selector, step, trait — different ID (auto-generated)
+	// Create a second active override with identical selector, step, trait — different ID (auto-generated).
+	// Both are active at the same specificity and overlapping date range: a real conflict.
 	createBody := `{
 		"stepKey": "obtain-judgment",
 		"traitKey": "slaHours",
 		"selector": {"state": "SC"},
 		"value": 999,
 		"effectiveDate": "2025-01-01",
-		"status": "draft",
-		"description": "Duplicate attempt"
+		"status": "active",
+		"description": "Duplicate active override"
 	}`
 	req := httptest.NewRequest(http.MethodPost, "/api/overrides", bytes.NewReader([]byte(createBody)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -801,8 +809,8 @@ func TestOverrideHandler_DuplicateCreation(t *testing.T) {
 	// System allows it — IDs are auto-generated, no uniqueness constraint on (step, trait, selector)
 	assert.Equal(t, http.StatusCreated, rec.Code, "duplicate creation should succeed (conflict surfaced via /conflicts, not at write time)")
 
-	// Conflict detection must identify the draft+active pair — both are non-archived,
-	// same specificity, same selector, overlapping date ranges (infinite)
+	// Conflict detection must identify the active+active pair —
+	// same step/trait, same specificity, same selector, overlapping date ranges (infinite).
 	reqConflict := httptest.NewRequest(http.MethodGet, "/api/overrides/conflicts", nil)
 	recConflict := httptest.NewRecorder()
 	cConflict := e.NewContext(reqConflict, recConflict)
@@ -813,5 +821,5 @@ func TestOverrideHandler_DuplicateCreation(t *testing.T) {
 		Conflicts []domain.ConflictPair `json:"conflicts"`
 	}
 	require.NoError(t, json.NewDecoder(recConflict.Body).Decode(&conflictResp))
-	assert.NotEmpty(t, conflictResp.Conflicts, "draft+active pair at same spec/dates must be detected as conflict")
+	assert.NotEmpty(t, conflictResp.Conflicts, "active+active pair at same spec/dates must be detected as conflict")
 }

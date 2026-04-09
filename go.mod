@@ -1,4 +1,4 @@
-module github.com/fardinabir/go-svc-boilerplate
+module github.com/fardinabir/rules-resolution-svc
 
 go 1.25
 
