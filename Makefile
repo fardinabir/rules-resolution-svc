@@ -67,7 +67,7 @@ stop:
 
 .PHONY: clear
 clear:
-	docker compose down -v --remove-orphans
+	docker compose down -v --remove-orphans --rmi local
 
 .PHONY: serve
 serve:

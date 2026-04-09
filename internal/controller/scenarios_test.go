@@ -147,7 +147,6 @@ func setupScenariosTest(t *testing.T) ResolveHandler {
 
 	dbInstance, err := db2.NewTestDB()
 	require.NoError(t, err, "create test DB")
-	require.NoError(t, db2.Migrate(dbInstance), "run migrations")
 
 	seedProductionData(t, dbInstance)
 
